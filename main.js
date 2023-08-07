@@ -287,5 +287,8 @@ document.querySelectorAll('button').forEach((button, i) => {
 		if (i === 1) {
 			action = ACTION_CHANGE;
 		}
+		if (i === 2) {
+			shuffleHalf();
+		}
 	});
 });
