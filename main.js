@@ -15,6 +15,19 @@ const colors = {
 	yellow: '#fc0',
 	purple: '#73f',
 };
+const count = i => {
+	return all
+		.map(item => item.mod == i ? 1 : 0)
+		.filter(item => item != 0)
+		.reduce((a, b) => a + b, 0);
+};
+const updateCount = () => {
+	let text = '';
+	for (let i=0; i<modules.length; ++i) {
+		text += `${i}: ${count(i)}\n`;
+	}
+	document.querySelector('textarea').value = text.trim();
+};
 const getCenter = (i) => space + cellSize/2 + (cellSize + space)*i;
 const draw = ({ row, col, rot, mod }) => {
 	const x = getCenter(col);
@@ -114,6 +127,22 @@ const diagonal = () => {
 	ctx.lineTo(end - w + d, ini);
 	ctx.fill();
 };
+const cornerSquare = (side) => {
+	ctx.fillRect(ini, ini, side, side);
+};
+const invertSquare = (inner, outer) => {
+	const a = ini;
+	const b = ini + inner;
+	const c = ini + outer;
+	ctx.beginPath();
+	ctx.moveTo(b, a);
+	ctx.lineTo(c, a);
+	ctx.lineTo(c, c);
+	ctx.lineTo(a, c);
+	ctx.lineTo(a, b);
+	ctx.lineTo(b, b);
+	ctx.fill();
+};
 const rotate = (n = 1) => {
 	ctx.rotate(n*Math.PI/2);
 };
@@ -124,6 +153,29 @@ const useColor = (name) => {
 	ctx.fillStyle = colors[name];
 };
 const modules = [
+	() => {
+		useColor('yellow');
+		strangeShape1();
+
+		rotate(2);
+		invertSquare(cm(6), cm(8));
+
+		rotate(1);
+		mirror();
+		strangeShape1();
+	},
+	() => {
+		rotate(3);
+
+		useColor('purple');
+		invertSquare(cm(6), cm(8));
+
+		rotate();
+		strangeShape1();
+		rotate();
+		mirror();
+		strangeShape1();
+	},
 	() => {
 		useColor('yellow');
 		strangeShape1();
@@ -149,6 +201,7 @@ const { localStorage } = window;
 const allJSON = localStorage.getItem('all');
 const store = () => {
 	localStorage.setItem('all', JSON.stringify(all));
+	updateCount();
 };
 const shuffle = () => {
 	all.forEach(item => {
@@ -231,10 +284,10 @@ canvas.addEventListener('click', e => {
 	const y = e.offsetY;
 	const item = all.find(item => isInside(item, x, y));
 	if (!item) return;
-	if (action === ACTION_CHANGE) {
+	if ((action === ACTION_CHANGE) ^ e.ctrlKey) {
 		onCtrlClick(item);
 	}
-	if (action === ACTION_ROTATE) {
+	if ((action === ACTION_ROTATE) ^ e.ctrlKey) {
 		onClick(item);
 	}
 });
